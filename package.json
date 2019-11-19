@@ -1,0 +1,19 @@
+{
+  "name": "backisi",
+  "version": "1.0.0",
+  "description": "A node.js RESTful API, project ISI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/Messkan/projectisi.git"
+  },
+  "author": "Ben Khelil Iskander, Bouachir Omar",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/Messkan/projectisi#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
