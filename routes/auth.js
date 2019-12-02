@@ -1,10 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../config/database');
-const User = require('../models/User');
-const Sequelize = require('sequelize');
-const Op = Sequelize.Op;
+const router = require('express').Router();
 
+const User = require('../models/User');
+
+const bcrypt = require('bcrypt-nodejs');
 
 const jwt = require("jsonwebtoken");
 const {jwtOptions} = require('../config/jwtOptions');
@@ -22,34 +20,53 @@ const getUser = async obj => {
 
 
 router.post('/login', async function(req, res, next) {
-    const { username, password } = req.body;
-    if (username && password) {
-        let user = await getUser({ username: username });
+    const { email, password } = req.body;
+    if (email && password) {
+        let user = await getUser({ email: email });
         if (!user) {
             res.status(401).json({ message: 'No such user found' });
         }
-        if ( user.password === password ) {
-            // from now on we'll identify the user by the id and the id is the
-            // only personalized value that goes into our token
-            let payload = { id: user.id , role: user.role };
-            console.log(jwtOptions.secretOrKey);
-            let token = jwt.sign(payload, jwtOptions.secretOrKey);
-            res.json({ msg: 'ok', token: token  });
-        } else {
-            res.status(401).json({ msg: 'Password is incorrect' });
-        }
+
+        bcrypt.compare( password , user.password, (err, result) =>{
+            if(err){
+                return res.status(403).json({message :'incorrect password'});
+            }
+            if(result){
+                let payload = { id: user.id , role: user.role };
+                console.log(jwtOptions.secretOrKey);
+                let token = jwt.sign(payload, jwtOptions.secretOrKey);
+                res.status(200).json({ message: 'ok', token: token  });
+            }
+        })
+
     }
 });
 
 //Only for test
-router.post('/registerAdmin', function(req, res, next) {
+router.post('/register', function(req, res, next) {
 
-    console.log(req.body.role);
-    const { username, email , password , role } = req.body;
-    console.log({ username, email , password , role } );
-     createUser({ username, email , password , role }).then(user =>
-        res.json({ user, msg: 'account created successfully' })
-    );
+
+    const { username, email } = req.body;
+       console.log(req.body.email);
+    const user = getUser({email : req.body.email});
+
+
+
+    bcrypt.hash(req.body.password , 10 , (err, hash) => {
+        if (err) {
+            return res.status(500).json({
+                error: err
+            })
+            }
+
+        else{
+
+            createUser({ username, email , password : hash , role: 'ROLE_ENSEIGNANT' }).then(user =>
+                res.json({ user, msg: 'account created successfully' })
+            );
+        }
+    }) ;
+
 });
 
 module.exports = router;
