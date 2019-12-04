@@ -24,10 +24,9 @@ const getSession = async (obj) => {
 
 
 // endpoint pour ajouter les horaires
+/*
 router.post("/ajouterHoraire" , async function (req,res) {
 
-    const {h_debut , h_fin} = req.body;
-    console.log(req.body);
     const { idSession } = req.body;
     console.log(idSession);
     let session =  await getSession({id : idSession });
@@ -44,7 +43,7 @@ router.post("/ajouterHoraire" , async function (req,res) {
     }
       res.status(200).json({session , message : "success" }) ;
 } );
-
+*/
 
 // endpoint pour tous les horaires
 router.get("/listeHoraires" , function (req, res) {
