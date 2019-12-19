@@ -13,7 +13,7 @@ const checkAuth = require('./middleware/check-auth');
 const { userRoutes, authRoutes, gradeRoutes, horaireRoutes, sessionRoutes , enseignantRoutes, seanceRoutes } = require('./routes');
 
 const passport = require('passport');
-const bcrypt = require('bcrypt-nodejs');
+//const bcrypt = require('bcrypt-nodejs');
 const { strategy } = require('./config/jwtOptions');
 
 // restApi config
@@ -23,6 +23,7 @@ app.use((req, res, next) => {
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     );
+
     if (req.method === "OPTIONS") {
         res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
         return res.status(200).json({});
@@ -43,9 +44,10 @@ db.authenticate()
 
 Horaire.hasMany(Seance, {'as' : 'Seances'});
 Jour.hasMany(Seance , {'as' : 'Seances'});
-Seance.belongsTo(Jour);
+Seance.belongsTo(Jour );
 Seance.belongsTo(Horaire);
-Session.hasMany(Jour, {'as' : 'Jours'});
+Session.hasMany(Jour, {'as' : 'Jours' , onDelete : 'cascade' , 'hooks' : true});
+Jour.belongsTo(Session);
 Session.hasMany(Horaire, {'as' : 'Horaires'});
 User.belongsTo(Grade);
 Grade.hasMany(User , {'as' : 'Enseignants'});
@@ -66,7 +68,7 @@ Session.sync()
 
 Jour.sync()
     .then(() => console.log('Jour table created successfully'))
-    .catch(() => console.log('Jour table error'));
+
 
 
 Horaire.sync()
@@ -82,10 +84,8 @@ Grade.sync()
     .then(() => console.log('Grade table created successfully'))
     .catch(() => console.log('Grade table error'));
 
-/*
 EnseignantSeance.sync()
     .then(()=> console.log('EnseignantSeance created successfully'));
-*/
 
 // parse application/json
 app.use(bodyParser.json());

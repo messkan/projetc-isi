@@ -5,9 +5,12 @@ const Jour = require('../models/Jour');
 const User = require('../models/User');
 
 // function create seance
-const seanceCreate = async (nbr_salle) => {
-    return await Seance.create({nbr_salle});
+const seanceCreate = async ({nbrSalle }) => {
+    return await Seance.create({nbrSalle });
 };
+
+
+
 
 // function find horaire
 const getHoraire = async (obj) => {
@@ -35,28 +38,30 @@ const getUser = async (obj) => {
 // ajouter une seance
 router.post("/ajouterSeance" , async function (req,res) {
 
-    const jour =  getJour({id : req.body.idJour });
-
-
+    const jour =  await getJour({id : req.body.idJour });
 
 
     if(!jour){
         res.status(404).json({message : 'jour not found'});
     }
-    const horaire =  getHoraire({id : req.body.idHoraire});
+    const horaire =  await getHoraire({id : req.body.idHoraire});
 
     if(!horaire)
     {
         res.status(404).json({message : 'horaire not found'});
     }
-
-    seanceCreate({nbr_salle: req.body.nbr_salle})
+      //  console.log(req.body.nbr_salle);
+    seanceCreate({nbrSalle : req.body.nbrSalle})
         .then(seance => {
-
             jour.addSeance(seance);
             horaire.addSeance(seance);
-
-
+            
+            req.body.responsables.forEach(async function (item,i ) {
+                 console.log(item);
+                let user = await getUser({id: item.id});
+                console.log( horaire.h_debut - horaire.h_fin);
+                user.addSeance(seance , { through : { nbr_heure :  horaire.h_debut - horaire.h_fin} });
+            })
 
             res.status(201).json({seance , message: 'created with success'});
         })
@@ -64,6 +69,7 @@ router.post("/ajouterSeance" , async function (req,res) {
 
 
 })
+
 
 
 

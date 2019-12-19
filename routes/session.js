@@ -10,8 +10,8 @@ const ajouterSession = async ({date_deb, date_fin}) => {
 }
 
 // pour ajouter les jours de la session
-const ajouterJour = async ({dateJour}) => {
-    return await Jour.create({dateJour})
+const ajouterJour = async ({dateJour , name}) => {
+    return await Jour.create({dateJour , name})
 };
 
 // pour ajouter un horaire
@@ -24,6 +24,13 @@ const ajouterHoraire = async ({h_debut, h_fin}) => {
 const listeSession = async () => {
     return await Session.findAll();
 };
+
+// function delete session
+const deleteSession = async (obj) => {
+    return await Session.destroy({
+      where: obj
+    })
+}
 
 // details d'une session
 const detailsSession = async obj => {
@@ -40,6 +47,8 @@ const detailsSession = async obj => {
     });
 };
 
+const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
 
 //ajouter une session
 router.post("/ajouterSession", function (req, res) {
@@ -50,7 +59,8 @@ router.post("/ajouterSession", function (req, res) {
 
             for (let i = new Date(date_deb); i <= new Date(date_fin); i.setDate(i.getDate() + 1)) {
 
-                ajouterJour({dateJour: new Date(i)})
+                let dateJour = new Date(i);
+                ajouterJour({dateJour: dateJour , name : days[dateJour.getDay()] })
                     .then(jour => {
                         session.addJour(jour);
                     })
@@ -85,6 +95,14 @@ router.get('/listeSessions', function (req, res) {
     listeSession().then(sessions => {
         res.json(sessions)
     });
+})
+
+//delete session
+router.delete('/supprimerSession' , async function (req , res) {
+        deleteSession({ id : req.body.id } )
+            .then(() => {
+                return res.status(200).json({'message' : 'deleted'})
+            });
 })
 
 
