@@ -162,14 +162,34 @@ router.post("/affecterEnseignant",  async function (req ,res) {
 
     if(user)
     {
-        const seance = await getSeance({'id' : req.body.seance});
+
+      const grade = await user.getGrade();
+
+      const seances = await user.getSeances();
+          console.log("length =" + seances.length)
+      if(grade.nbr_seance <= seances.length)
+          return res.status(403).json({"message" : "nombre de seance épuisé"});
+
+      else {
+
+          const seance = await getSeance({'id': req.body.seance});
 
 
-      if(seance) {
-          user.addSeance(seance);
-          res.status(200).json({'message' : 'seance affected'});
+          if (seance) {
+              const enseignants = await seance.getEnseignants();
+              if(seance.nbrSalle * 2 <= enseignants.length)
+              {
+                  return res.status(403).json({"message" : "nombre d'enseignant epuisé"});
+              }
+              else {
+                  user.addSeance(seance);
+
+                  return res.status(200).json({'message': 'seance affected'});
+              }
+          }
+
+
       }
-        res.status(200).json({'message' : 'seance affected'});
 
     }
     else {

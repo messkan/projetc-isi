@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const schedule = require('node-schedule');
 const bodyParser = require('body-parser');
 const User = require('./models/User');
 const Session = require('./models/Session');
@@ -9,7 +10,6 @@ const Seance = require('./models/Seance');
 const Grade = require('./models/Grade');
 const EnseignantSeance = require('./models/EnseignantSeance');
 const checkAuth = require('./middleware/check-auth');
-
 const { userRoutes, authRoutes, gradeRoutes, horaireRoutes, sessionRoutes , enseignantRoutes, seanceRoutes } = require('./routes');
 
 const passport = require('passport');
@@ -92,8 +92,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
+const getSession = async () => {
+    return await Session.findOne();
+}
 
 
+schedule.scheduleJob("49 * * * *" , function () {
+
+
+})
 
 
 
@@ -114,6 +121,10 @@ app.use("/horaire" , horaireRoutes);
 app.use('/session' , sessionRoutes);
 app.use('/enseignant' , checkAuth , enseignantRoutes);
 app.use('/seance' , seanceRoutes);
+
+
+
+
 
 
 module.exports = app;

@@ -50,6 +50,10 @@ router.post("/ajouterSeance" , async function (req,res) {
     {
       return  res.status(404).json({message : 'horaire not found'});
     }
+
+    if( req.body.nbrSalle *2  < req.body.responsables.length )
+        return res.status(403).json({message: 'nombre de responsable plus grand que la capacité'});
+
       //  console.log(req.body.nbr_salle);
     seanceCreate({nbrSalle : req.body.nbrSalle})
         .then(seance => {
@@ -64,7 +68,7 @@ router.post("/ajouterSeance" , async function (req,res) {
                 user.addSeance(seance);
             })
 
-            res.status(201).json({seance , message: 'created with success'});
+           return res.status(201).json({seance , message: 'created with success'});
         })
 
 
