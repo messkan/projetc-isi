@@ -33,6 +33,10 @@ const getUser = async (obj) => {
     })
 }
 
+//liste Seances
+const getSeances = async () => {
+    return await Seance.findAll()
+} ;
 
 
 // ajouter une seance
@@ -75,6 +79,12 @@ router.post("/ajouterSeance" , async function (req,res) {
 
 })
 
+// liste des seances
+router.get('/listeSeance' , async function (req, res) {
+    const seances = await getSeances() ;
+
+    return res.status(200).json(seances);
+})
 
 
 

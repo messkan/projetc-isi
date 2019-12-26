@@ -183,6 +183,14 @@ router.post("/affecterEnseignant",  async function (req ,res) {
               }
               else {
                   user.addSeance(seance);
+                  if( (seance.nbrSalle * 2 ) === enseignants.length)
+                  {
+                      seance.update({
+                          complete: true
+                      }).then(seance => {
+                          return res.status(200).json({'message' : 'seance affected and completed'});
+                      });
+                  }
 
                   return res.status(200).json({'message': 'seance affected'});
               }
@@ -197,6 +205,9 @@ router.post("/affecterEnseignant",  async function (req ,res) {
     }
 
 })
+
+
+
 
 
 
