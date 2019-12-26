@@ -5,7 +5,7 @@ const Grade = db.define('grade' , {
     nom : {
         type: Sequelize.STRING
     } ,
-    nbr_heure: {
+    nbr_seance: {
         type: Sequelize.INTEGER
     }
 });

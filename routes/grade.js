@@ -2,8 +2,8 @@ const router = require('express').Router();
 const Grade = require('../models/Grade');
 
 // function pour ajouter un grade
-const ajouterGrade =  async ({ nom , nbr_heure }) => {
-    return await Grade.create({nom , nbr_heure})
+const ajouterGrade =  async ({ nom , nbr_seance }) => {
+    return await Grade.create({nom , nbr_seance})
 } ;
 
 // function liste des grades
@@ -21,9 +21,9 @@ const findGrade =async (obj) =>{
 // ajouter un nouveau grade
 router.post('/ajouterGrade' , function(req, res){
 
-    const { nom , nbr_heure } = req.body ;
+    const { nom , nbr_seance } = req.body ;
 
-    ajouterGrade({nom , nbr_heure})
+    ajouterGrade({nom , nbr_seance})
        .then(grade => res.status(200).json({grade , message : 'success'}));
 
 
@@ -40,7 +40,7 @@ router.get('/listeGrade' , function (req, res) {
 
 //modifier grade
 router.put('/modifierGrade/:id' , async function (req, res) {
-    const { nom , nbr_heure } = req.body ;
+    const { nom , nbr_seance } = req.body ;
 
     let grade = await findGrade({id : req.params.id});
 
@@ -48,10 +48,10 @@ router.put('/modifierGrade/:id' , async function (req, res) {
 
         grade.update({
             nom : req.body.nom ,
-            nbr_heure: req.body.nbr_heure
+            nbr_seance: req.body.nbr_seance
         })
             .then(() => {
-                res.status(200).json({message : 'updated'});
+             return   res.status(200).json({message : 'updated'});
             })
 
 
