@@ -29,28 +29,36 @@ router.post('/login', async function(req, res, next) {
 
         bcrypt.compare( password , user.password, (err, result) =>{
             if(err){
-                return res.status(403).json({message :'incorrect password'});
+                 res.status(403).json({message :'incorrect password'});
             }
             if(result){
-                let payload = { id: user.id , role: user.role };
+                let payload = { user   };
                 console.log(jwtOptions.secretOrKey);
                 let token = jwt.sign(payload, jwtOptions.secretOrKey);
-                res.status(200).json({ message: 'ok', token: token  });
+                res.status(200).json({ message: 'ok', id: user.id , nom: user.nom , prenom: user.prenom , cin: user.cin , email:user.email , role: user.role , token: token  });
             }
+            else{
+                res.status(403).json({message :'incorrect password'});
+            }
+
+
+
+
+
         })
 
     }
 });
 
 //Only for test
-router.post('/register', function(req, res, next) {
+router.post('/register', async  function(req, res, next) {
 
 
-    const { username, email } = req.body;
+    const { email } = req.body;
        console.log(req.body.email);
-    const user = getUser({email : req.body.email});
+    const user = await getUser({email : req.body.email});
 
-
+    /**
 
     bcrypt.hash(req.body.password , 10 , (err, hash) => {
         if (err) {
@@ -61,11 +69,22 @@ router.post('/register', function(req, res, next) {
 
         else{
 
-            createUser({ username, email , password : hash , role: 'ROLE_ENSEIGNANT' }).then(user =>
+            createUser({ email , password : hash , role: 'ROLE_ADMIN' }).then(user =>
                 res.json({ user, msg: 'account created successfully' })
             );
         }
-    }) ;
+    }) ;*/
+
+    bcrypt.hash(req.body.password , null , null, (err, hash) => {
+
+        console.log(hash);
+        createUser({
+            email : req.body.email ,
+            password : hash ,
+            role: 'ROLE_ADMIN',
+        }).then(user =>
+            res.status(200).json({ user, msg: 'account created successfully' }) );
+    })
 
 });
 

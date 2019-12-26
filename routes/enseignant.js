@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Grade = require('../models/Grade');
 const Seance = require('../models/Seance');
 
+
 // function creation d un  enseignant
 const createUser = async ({nom, prenom ,email , password, role , cin }) => {
     return await User.create({nom, prenom ,email , password, role , cin  });
@@ -15,6 +16,13 @@ const getUser = async obj => {
         where: obj,
     });
 };
+
+// function get seance
+const getSeance = async obj => {
+    return await Seance.findOne({
+        where: obj
+    })
+}
 
 //function update User
 const updateUser = async ({username, email , password, role , grade}) => {
@@ -94,7 +102,7 @@ router.post('/ajouterEnseignant', async function(req, res) {
 router.get('/listeEnseignant' , function (req , res) {
      listeEnseignant()
          .then(enseignants => {
-              res.json({enseignants});
+              res.status(200).json({enseignants});
          })
 });
 
@@ -145,7 +153,30 @@ router.delete('/supprimerEnseignant/:id' , async function (req , res) {
 })
 
 
-// affecter seance
+// affecter enseignant
+router.post("/affecterEnseignant",  async function (req ,res) {
+
+    console.log(req.userData.user.id);
+
+    const user = await getUser({'id' : req.userData.user.id}) ;
+
+    if(user)
+    {
+        const seance = await getSeance({'id' : req.body.seance});
+
+
+      if(seance) {
+          user.addSeance(seance);
+          res.status(200).json({'message' : 'seance affected'});
+      }
+        res.status(200).json({'message' : 'seance affected'});
+
+    }
+    else {
+        res.status(404).json({'message' : 'user not found'});
+    }
+
+})
 
 
 

@@ -85,7 +85,7 @@ router.get("/detailsSession/:id", function (req, res) {
 
     detailsSession({id: req.params.id})
         .then(session => {
-            res.json(session);
+            res.status(200).json(session);
         })
 })
 

@@ -42,13 +42,13 @@ router.post("/ajouterSeance" , async function (req,res) {
 
 
     if(!jour){
-        res.status(404).json({message : 'jour not found'});
+        return res.status(404).json({message : 'jour not found'});
     }
     const horaire =  await getHoraire({id : req.body.idHoraire});
 
     if(!horaire)
     {
-        res.status(404).json({message : 'horaire not found'});
+      return  res.status(404).json({message : 'horaire not found'});
     }
       //  console.log(req.body.nbr_salle);
     seanceCreate({nbrSalle : req.body.nbrSalle})
@@ -58,9 +58,10 @@ router.post("/ajouterSeance" , async function (req,res) {
             
             req.body.responsables.forEach(async function (item,i ) {
                  console.log(item);
-                let user = await getUser({id: item.id});
-                console.log( horaire.h_debut - horaire.h_fin);
-                user.addSeance(seance , { through : { nbr_heure :  horaire.h_debut - horaire.h_fin} });
+                let user = await getUser({id: item.value});
+
+                console.log( user);
+                user.addSeance(seance);
             })
 
             res.status(201).json({seance , message: 'created with success'});
