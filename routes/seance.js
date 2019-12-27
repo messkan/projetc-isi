@@ -35,7 +35,9 @@ const getUser = async (obj) => {
 
 //liste Seances
 const getSeances = async () => {
-    return await Seance.findAll()
+    return await Seance.findAll({
+        include: [{model: Jour} , {model: Horaire} , {model: User ,'as' : 'Enseignants'}]
+    })
 } ;
 
 
@@ -85,6 +87,11 @@ router.get('/listeSeance' , async function (req, res) {
 
     return res.status(200).json(seances);
 })
+
+
+
+
+
 
 
 

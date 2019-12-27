@@ -24,7 +24,7 @@ router.post('/login', async function(req, res, next) {
     if (email && password) {
         let user = await getUser({ email: email });
         if (!user) {
-            res.status(401).json({ message: 'No such user found' });
+          return  res.status(401).json({ message: 'No such user found' });
         }
 
         bcrypt.compare( password , user.password, (err, result) =>{
@@ -35,10 +35,10 @@ router.post('/login', async function(req, res, next) {
                 let payload = { user   };
                 console.log(jwtOptions.secretOrKey);
                 let token = jwt.sign(payload, jwtOptions.secretOrKey);
-                res.status(200).json({ message: 'ok', id: user.id , nom: user.nom , prenom: user.prenom , cin: user.cin , email:user.email , role: user.role , token: token  });
+               return res.status(200).json({ message: 'ok', id: user.id , nom: user.nom , prenom: user.prenom , cin: user.cin , email:user.email , role: user.role , token: token  });
             }
             else{
-                res.status(403).json({message :'incorrect password'});
+              return  res.status(403).json({message :'incorrect password'});
             }
 
 

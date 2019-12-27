@@ -7,7 +7,7 @@ const Seance = db.define('seance' , {
    } ,
    complete: {
        type: Sequelize.BOOLEAN ,
-       default: false
+       defaultValue: false
    }
 })
 

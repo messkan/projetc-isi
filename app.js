@@ -43,12 +43,12 @@ db.authenticate()
 
 
 Horaire.hasMany(Seance, {'as' : 'Seances'});
-Jour.hasMany(Seance , {'as' : 'Seances'});
+Jour.hasMany(Seance , {'as' : 'Seances' , onDelete: 'cascade' , 'hooks' : true});
 Seance.belongsTo(Jour );
 Seance.belongsTo(Horaire);
 Session.hasMany(Jour, {'as' : 'Jours' , onDelete : 'cascade' , 'hooks' : true});
 Jour.belongsTo(Session);
-Session.hasMany(Horaire, {'as' : 'Horaires'});
+Session.hasMany(Horaire, {'as' : 'Horaires' , onDelete: 'cascade' , 'hooks' : true});
 User.belongsTo(Grade);
 Grade.hasMany(User , {'as' : 'Enseignants'});
 
@@ -96,12 +96,75 @@ const getSession = async () => {
     return await Session.findOne();
 }
 
+let deadline ;
 
-schedule.scheduleJob("49 * * * *" , function () {
+Session.afterCreate((session , options ) => {
+    deadline = session.deadline;
+
+       console.log("deadline = " + deadline);
+       let day = deadline.getDay();
+       let month = deadline.getMonth();
+       let dayofmonth = deadline.getDate() ;
+       let year = deadline.getUTCFullYear();
+       /*
+       let date = new Date(year, month , dayofmonth , 15 , 44 , 0);
+       */
+       let date = new Date(2019 , 11 , 27 , 19 , 40, 0 );
+       //liste Seances
+       const getSeances = async () => {
+        return await Seance.findAll({
+           where: {complete: false}
+        }) ;
+    } ;
+       //users
+    const getEnseignants = async () => {
+        return await User.findAll({
+            where: {
+               complete : false
+
+            },
+
+        })
+    }
+
+    let i = schedule.scheduleJob( date , async function () {
+
+        let enseignants = await getEnseignants();
+        let listIncomp = await getSeances();
+
+        enseignants.forEach( async function (item , i ){
+            let grade = await item.getGrade();
+            let seances = await item.getSeances();
+
+            listIncomp.forEach( async function (seance, i ) {
+                await item.addSeance(seance);
+                let listEns = await seance.getEnseignants();
+
+                if( (seance.nbrSalle * 2 ) === listEns.length) {
+                    await   seance.update({
+                        complete: true
+                    })
+                }
+
+                if(grade.nbr_seance === seances.length){
+                    await user.update({
+                        complete: true
+                    });
+                    throw  {};
+                }
+            })
+
+        })
 
 
 
+
+
+    });
 })
+
+
+
 
 
 
@@ -120,7 +183,7 @@ app.use("/auth", authRoutes);
 app.use("/grade", checkAuth,  gradeRoutes);
 app.use("/horaire" , horaireRoutes);
 app.use('/session' , sessionRoutes);
-app.use('/enseignant' , checkAuth , enseignantRoutes);
+app.use('/enseignant'   , enseignantRoutes);
 app.use('/seance' , seanceRoutes);
 
 

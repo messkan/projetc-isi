@@ -7,6 +7,9 @@ const Session = db.define('session' , {
     } ,
     date_fin : {
         type: Sequelize.DATE
+    },
+    deadline: {
+      type: Sequelize.DATE
     }
 
 })

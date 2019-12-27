@@ -23,6 +23,10 @@ const User = db.define('user', {
 
     role : {
         type: Sequelize.STRING
+    },
+    complete: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
     }
 });
 

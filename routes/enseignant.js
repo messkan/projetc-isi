@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt-nodejs');
 const User = require('../models/User');
 const Grade = require('../models/Grade');
 const Seance = require('../models/Seance');
-
+const Sequelize = require('sequelize');
 
 // function creation d un  enseignant
 const createUser = async ({nom, prenom ,email , password, role , cin }) => {
@@ -25,8 +25,8 @@ const getSeance = async obj => {
 }
 
 //function update User
-const updateUser = async ({username, email , password, role , grade}) => {
-    return await User.update({ username , email , password , role  })
+const updateUser = async ({nom , prenom , email , grade}) => {
+    return await User.update({ nom, prenom , email  , role  })
 }
 
 // function get Grade
@@ -58,14 +58,9 @@ const listeEnseignant = async () => {
 router.post('/ajouterEnseignant', async function(req, res) {
 
 
-
   const  user = await  getUser({email : req.body.email});
         if(user)
         return   res.status(409).json({message : 'email already exists'});
-
-
-
-
 
     bcrypt.hash(req.body.password , null , null, (err, hash) => {
 
@@ -177,12 +172,20 @@ router.post("/affecterEnseignant",  async function (req ,res) {
 
           if (seance) {
               const enseignants = await seance.getEnseignants();
+
               if(seance.nbrSalle * 2 <= enseignants.length)
               {
                   return res.status(403).json({"message" : "nombre d'enseignant epuisé"});
               }
               else {
-                  user.addSeance(seance);
+                  await user.addSeance(seance);
+
+
+                  if(grade.nbr_seance ===  seances.length )
+
+                     await user.update({
+                          complete: true
+                      });
                   if( (seance.nbrSalle * 2 ) === enseignants.length)
                   {
                       seance.update({
@@ -206,9 +209,85 @@ router.post("/affecterEnseignant",  async function (req ,res) {
 
 })
 
+//annuler seance
+router.delete('/annulerSeance/:id' , async function (req , res) {
+
+    const user = await getUser({'id' : req.userData.user.id}) ;
+    if(seance)
+    {
+        user.removeSeance(seance).then( () => {
+            seance.update({
+               complete: false
+            }).then(() => {
+                return res.status(200).json({message : "seance annulé"});
+            })
+        });
+
+    }else{
+        return res.status(404).json({message : 'seance  not found'});
+    }
+})
+
+//test
+router.get("/test" , async function (req, res) {
+
+    const Op = Sequelize.Op;
+    //users
+    const getEnseignants = async () => {
+        return await User.findAll(
+            {
+             include: [
+                 { model: Grade
+             }
+             ] ,
+                where: {
+                 complete: false
+                }
+        })
+    } ;
+
+    const getSeances = async () => {
+        return await Seance.findAll({
+            where: {
+                complete: false
+            }
+        })
+    } ;
+
+    let enseignants = await getEnseignants();
+    let listIncomp = await getSeances();
+
+    enseignants.forEach( async function (item , i ){
+        let grade = await item.getGrade();
 
 
+            listIncomp.forEach( async function (seance, i ) {
 
+                let listEns = await seance.getEnseignants();
+
+                if( (seance.nbrSalle * 2 ) === listEns.length) {
+                 await   seance.update({
+                        complete: true
+                    })
+                }
+                let seances = await item.getSeances();
+                console.log("nbr = " + seances.length);
+                if(grade.nbr_seance > seances.length){
+                    await item.addSeance(seance);
+                      console.log("here");
+
+
+                }else{
+                    await item.update({
+                        complete: true
+                    });
+                    throw {}
+                }
+            })
+
+        })
+           return res.json({message : "ok"})
+});
 
 
 module.exports = router;

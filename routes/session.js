@@ -4,8 +4,8 @@ const Jour = require('../models/Jour');
 const Horaire = require('../models/Horaire');
 
 // function pour ajouter une session
-const ajouterSession = async ({date_deb, date_fin}) => {
-    return await Session.create({date_deb, date_fin});
+const ajouterSession = async ({date_deb, date_fin ,deadline}) => {
+    return await Session.create({date_deb, date_fin , deadline});
 
 }
 
@@ -51,34 +51,38 @@ const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Sa
 
 
 //ajouter une session
-router.post("/ajouterSession", function (req, res) {
+router.post("/ajouterSession", async  function (req, res) {
 
-    const {date_deb, date_fin} = req.body;
-    ajouterSession({date_deb, date_fin})
-        .then(session => {
+    const {date_deb, date_fin, deadline} = req.body;
 
-            for (let i = new Date(date_deb); i <= new Date(date_fin); i.setDate(i.getDate() + 1)) {
+     const dSession = await deleteSession({});
 
-                let dateJour = new Date(i);
-                ajouterJour({dateJour: dateJour , name : days[dateJour.getDay()] })
-                    .then(jour => {
-                        session.addJour(jour);
-                    })
-            }
 
-            for (let i = 0; i < req.body.horaire.length; i++) {
-                const {h_debut, h_fin} = req.body.horaire[i];
-                ajouterHoraire({h_debut, h_fin})
-                    .then(horaire => {
-                        session.addHoraire(horaire);
 
-                    })
-            }
+        ajouterSession({date_deb, date_fin, deadline})
+            .then(session => {
 
-            res.status(200).json({session, 'message': 'success'});
-        })
+                for (let i = new Date(date_deb); i <= new Date(date_fin); i.setDate(i.getDate() + 1)) {
 
-});
+                    let dateJour = new Date(i);
+                    ajouterJour({dateJour: dateJour, name: days[dateJour.getDay()]})
+                        .then(jour => {
+                            session.addJour(jour);
+                        })
+                }
+
+                for (let i = 0; i < req.body.horaire.length; i++) {
+                    const {h_debut, h_fin} = req.body.horaire[i];
+                    ajouterHoraire({h_debut, h_fin})
+                        .then(horaire => {
+                         session.addHoraire(horaire);
+
+                        })
+                }
+
+          return   res.status(200).json({session, 'message': 'success'});
+            })
+    });
 
 // details d'une session
 router.get("/detailsSession/:id", function (req, res) {
