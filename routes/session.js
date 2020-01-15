@@ -57,6 +57,17 @@ router.post("/ajouterSession", async  function (req, res) {
 
      const dSession = await deleteSession({});
 
+  /* await User.update({
+        complete: false
+    });
+
+     if(!validateDate(date_deb) || !validateDate(date_fin) || !validateDate(deadline) )
+     return res.status(401).json({message:'date format not valid']);
+
+
+    */
+
+
 
 
         ajouterSession({date_deb, date_fin, deadline})
@@ -105,9 +116,22 @@ router.get('/listeSessions', function (req, res) {
 router.delete('/supprimerSession' , async function (req , res) {
         deleteSession({ id : req.body.id } )
             .then(() => {
-                return res.status(200).json({'message' : 'deleted'})
+
+               User.update({
+                    complete: false
+                }).then(() =>{
+                   return res.status(200).json({'message' : 'deleted'})
+               }) ;
+
             });
 })
+
+/*
+function validateDate($date, $format = 'Y-m-d')
+{
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) === $date;
+}*/
 
 
 module.exports = router;

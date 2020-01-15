@@ -71,7 +71,7 @@ router.post("/ajouterSeance" , async function (req,res) {
                 let user = await getUser({id: item.value});
 
                 console.log( user);
-                user.addSeance(seance);
+              await  user.addSeance(seance, { through : {responsable:true }});
             })
 
            return res.status(201).json({seance , message: 'created with success'});

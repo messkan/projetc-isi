@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt-nodejs');
 const User = require('../models/User');
 const Grade = require('../models/Grade');
 const Seance = require('../models/Seance');
+const Jour = require('../models/Jour');
+const Horaire = require('../models/Horaire');
 const Sequelize = require('sequelize');
 
 // function creation d un  enseignant
@@ -188,15 +190,19 @@ router.post("/affecterEnseignant",  async function (req ,res) {
                       });
                   if( (seance.nbrSalle * 2 ) === enseignants.length)
                   {
-                      seance.update({
+                     await seance.update({
                           complete: true
-                      }).then(seance => {
-                          return res.status(200).json({'message' : 'seance affected and completed'});
                       });
+                      return res.status(200).json({'message': 'seance affected and complete'});
+                  }
+                  else {
+                      return res.status(200).json({'message': 'seance affected'});
                   }
 
-                  return res.status(200).json({'message': 'seance affected'});
+
               }
+          } else{
+              return res.status(404).json({'message' :'seance not found'});
           }
 
 
@@ -228,6 +234,23 @@ router.delete('/annulerSeance/:id' , async function (req , res) {
     }
 })
 
+//liste Seances
+const getListe = async (obj) => {
+    return await Seance.findAll({
+        include: [{model: User ,'as' : 'Enseignants' , where: {id:obj.id}}]
+    })
+} ;
+const getSeances = async () => {
+    return await Seance.findAll({
+        where: {
+            complete: false
+        },
+        include: [
+            {model: User, 'as' : 'Enseignants'}
+        ]
+    })
+} ;
+
 //test
 router.get("/test" , async function (req, res) {
 
@@ -238,7 +261,8 @@ router.get("/test" , async function (req, res) {
             {
              include: [
                  { model: Grade
-             }
+             } ,
+                 {model: Seance , 'as' : 'Seances'}
              ] ,
                 where: {
                  complete: false
@@ -246,48 +270,103 @@ router.get("/test" , async function (req, res) {
         })
     } ;
 
-    const getSeances = async () => {
-        return await Seance.findAll({
-            where: {
-                complete: false
-            }
-        })
-    } ;
+
 
     let enseignants = await getEnseignants();
     let listIncomp = await getSeances();
 
-    enseignants.forEach( async function (item , i ){
+   for(const item of enseignants){
         let grade = await item.getGrade();
 
+        var BreakException = {};
 
-            listIncomp.forEach( async function (seance, i ) {
-
-                let listEns = await seance.getEnseignants();
-
-                if( (seance.nbrSalle * 2 ) === listEns.length) {
-                 await   seance.update({
-                        complete: true
-                    })
-                }
-                let seances = await item.getSeances();
-                console.log("nbr = " + seances.length);
-                if(grade.nbr_seance > seances.length){
-                    await item.addSeance(seance);
-                      console.log("here");
+          try {
+              for (const seance of listIncomp) {
 
 
-                }else{
-                    await item.update({
-                        complete: true
-                    });
-                    throw {}
-                }
-            })
+                  const listEns = await seance.getEnseignants();
+                     console.log("length = " + listEns.length);
+                  if ((seance.nbrSalle * 2) === listEns.length) {
+                      await seance.update({
+                          complete: true
+                      })
+                      continue;
+                  }
 
-        })
-           return res.json({message : "ok"})
+                  //seances =  await item.getSeances();
+                  let seances = await getListe(item);
+
+
+                  console.log("asaz = " + seances.length);
+                  if (grade.nbr_seance > seances.length) {
+                      await seance.addEnseignant(item);
+
+                  } else {
+                      await item.update({
+                          complete: true
+                      });
+                      throw BreakException;
+                  }
+
+              }
+          }
+                catch(e) {
+                  if(e !==  BreakException ) throw e;
+              }
+
+        }
+     return res.json({message : "ok"})
 });
+
+const fs = require('fs');
+const Handlebars = require('handlebars');
+
+function render(filename, data)
+{
+    let source   = fs.readFileSync(filename,'utf8').toString();
+    let template = Handlebars.compile(source);
+    let output = template(data);
+    return output;
+}
+
+
+
+router.post('/download', async function (req ,res ) {
+
+    let file = __dirname + '/test.html';
+
+    const user = await getUser({'id' : req.userData.user.id}) ;
+    const seances = await Seance.findAll({
+        include: [ {model: Jour } , {model: Horaire} , {model:User, as: 'Enseignants', where :{id: user.id}} ]
+    });
+    let data = seances ;
+    console.log(data);
+
+    let o = new Object();
+    for (let key in data)
+    {
+        if (data.hasOwnProperty(key))
+        {
+
+            let j  = data[key].jour.name;
+            console.log(j);
+            if(o[j] === undefined)
+                o[j] = [];
+            o[j].push(data[key].horaire);
+
+        }
+    }
+
+   let y = new Object();
+    y.keys = o ;
+
+    let result = render(file,o);
+
+    console.log(result);
+    res.send(data);
+})
+
+
 
 
 module.exports = router;

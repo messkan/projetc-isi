@@ -183,7 +183,7 @@ app.use("/auth", authRoutes);
 app.use("/grade", checkAuth,  gradeRoutes);
 app.use("/horaire" , horaireRoutes);
 app.use('/session' , sessionRoutes);
-app.use('/enseignant'   , enseignantRoutes);
+app.use('/enseignant', checkAuth   , enseignantRoutes);
 app.use('/seance' , seanceRoutes);
 
 
