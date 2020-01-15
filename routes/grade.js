@@ -6,6 +6,14 @@ const ajouterGrade =  async ({ nom , nbr_seance }) => {
     return await Grade.create({nom , nbr_seance})
 } ;
 
+//function pour supprimer un grade
+const supprimerGrade = async (obj) => {
+    return await Grade.delete({
+        where : obj
+    })
+}
+
+
 // function liste des grades
 const listeGrade = async () => {
     return await Grade.findAll();
@@ -58,6 +66,10 @@ router.put('/modifierGrade/:id' , async function (req, res) {
 })
 
 //supprimer grade
+router.delete('/supprimerGrade/:id', async function (req,res) {
+       await supprimerGrade({id: req.params.id});
 
+       return res.status(200).json({'message': 'deleted'});
+})
 
 module.exports = router;
