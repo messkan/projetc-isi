@@ -8,7 +8,7 @@ const ajouterGrade =  async ({ nom , nbr_seance }) => {
 
 //function pour supprimer un grade
 const supprimerGrade = async (obj) => {
-    return await Grade.Destroy({
+    return await Grade.destroy({
         where : obj
     })
 }
