@@ -56,6 +56,7 @@ const listeEnseignant = async () => {
     );
 }
 
+
 // ajout d'un enseignant
 router.post('/ajouterEnseignant', async function(req, res) {
 
@@ -77,22 +78,21 @@ router.post('/ajouterEnseignant', async function(req, res) {
 
 
             }).then(user => {
+
+                    // affecter cet enseignant à une grade
                    getGrade({id: req.body.grade})
                         .then(grade => {
 
                             grade.addEnseignant(user);
 
-                    return res.status(200).json({user, message:'created'});
+                            res.json({user, msg: 'account created successfully'})
 
                         })
-                   }
-                   
  }
             );
     }) ;
 
 });
-
 
 
 // liste enseignant
