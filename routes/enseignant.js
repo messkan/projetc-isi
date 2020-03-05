@@ -85,10 +85,10 @@ router.post('/ajouterEnseignant', async function(req, res) {
 
                             grade.addEnseignant(user);
 
-                            res.json({user, msg: 'account created successfully'})
+                          return  res.json({user, msg: 'account created successfully'})
 
                         })
-                   }else {
+                   }
                     return res.status(200).json({user, msg: 'acount created without grade'});    
                    }
  }
