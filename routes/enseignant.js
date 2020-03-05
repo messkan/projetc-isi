@@ -85,7 +85,7 @@ router.post('/ajouterEnseignant', async function(req, res) {
 
                             grade.addEnseignant(user);
 
-                           return res.status(200).json({user, message:'created'});
+                          res.status(200).json({user, message:'created'});
 
                         })
                    }
