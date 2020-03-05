@@ -78,6 +78,7 @@ router.post('/ajouterEnseignant', async function(req, res) {
 
             }).then(user => {
 
+                   if(req.body.grade){
                     // affecter cet enseignant à une grade
                    getGrade({id: req.body.grade})
                         .then(grade => {
@@ -87,6 +88,9 @@ router.post('/ajouterEnseignant', async function(req, res) {
                             res.json({user, msg: 'account created successfully'})
 
                         })
+                   }else {
+                    return res.status(200).json({user, msg: 'acount created without grade'});    
+                   }
  }
             );
     }) ;
