@@ -77,19 +77,15 @@ router.post('/ajouterEnseignant', async function(req, res) {
 
 
             }).then(user => {
-                    console.log(req.body.grade); 
-                   if(req.body.grade != null){
-                    // affecter cet enseignant à une grade
                    getGrade({id: req.body.grade})
                         .then(grade => {
 
                             grade.addEnseignant(user);
 
-                          res.status(200).json({user, message:'created'});
+                    return res.status(200).json({user, message:'created'});
 
                         })
                    }
-                return res.json({user ,message: 'created without grade'});   
                    
  }
             );
